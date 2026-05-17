@@ -1,0 +1,40 @@
+services:
+  frontend:
+    platform: linux/amd64
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_PORT=5432
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pxldb
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+
+volumes:
+  db_data:
